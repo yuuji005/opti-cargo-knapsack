@@ -157,7 +157,7 @@
                     <input type="number" id="inp-iter" value="50">
                 </div>
                 <div class="form-group">
-                    <label>SA: Suhu Awal (T0)</label>
+                    <label>SA: Suhu Awal (°C)</label>
                     <input type="text" id="inp-sa-t" value="100">
                 </div>
                 <div class="form-group">
@@ -430,11 +430,17 @@
         chartSuhu.destroy(); 
         chartSuhu = new Chart(document.getElementById('grafikSuhu').getContext('2d'), {
             type: 'line',
-            data: { labels: labels, datasets: [{ label: 'Suhu (T)', data: tempHist, borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.08)', fill: true, borderWidth: 2, tension: 0.4, pointRadius: 0 }] },
+            data: { labels: labels, datasets: [{ label: 'Suhu (°C)', data: tempHist, borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.08)', fill: true, borderWidth: 2, tension: 0.4, pointRadius: 0 }] },
             options: { 
                 responsive: true, maintainAspectRatio: false, color: '#a1a1aa',
-                plugins: { legend: { display: false }, title: { display: true, text: 'Cooling Schedule (Penurunan Suhu SA)', font: { family: 'Poppins', size: 13, weight: '600' }, color: '#ffffff' } },
-                scales: { y: { beginAtZero: true, title: { display: true, text: 'Suhu (T)', color: '#a1a1aa' }, grid: { display: false }, ticks: { color: '#a1a1aa' } }, x: { grid: { display: false }, ticks: { display: false } } }
+                plugins: { 
+                    legend: { display: false }, 
+                    title: { display: true, text: 'Cooling Schedule (°C)', font: { family: 'Poppins', size: 13, weight: '600' }, color: '#ffffff' } 
+                },
+                scales: { 
+                    y: { beginAtZero: true, title: { display: true, text: 'Suhu (°C)', color: '#a1a1aa' }, grid: { display: false }, ticks: { color: '#a1a1aa' } }, 
+                    x: { grid: { display: false }, ticks: { display: false } } 
+                }
             }
         });
     }
