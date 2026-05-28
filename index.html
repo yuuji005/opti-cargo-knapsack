@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OptiCargo - Simulasi Knapsack</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { 
+            --primary: #3b82f6; 
+            --primary-hover: #2563eb; 
+            --secondary: #10b981; 
+            
+            --bg-color-start: #121212; 
+            --bg-color-end: #1c1c1e;   
+            --card-bg: #242426;        
+            --text-main: #ffffff;      
+            --text-muted: #a1a1aa;     
+        }
+
+        /* Kustomisasi Scrollbar agar tema gelap lebih rapi */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1c1c1e; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #3a3a3c; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: linear-gradient(135deg, var(--bg-color-start) 0%, var(--bg-color-end) 100%);
+            background-attachment: fixed; 
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 20px; 
+            min-height: 100vh;
+        }
+
+        .dashboard { max-width: 1300px; margin: auto; }
+
+        header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            background: rgba(36, 36, 38, 0.6); 
+            padding: 20px;
+            border-radius: 16px;
+            backdrop-filter: blur(5px); 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        header h1 { font-size: 2.5rem; color: var(--primary); margin: 0 0 5px 0; letter-spacing: -1px; }
+        header p { color: var(--text-muted); margin: 0; font-weight: 300; }
+
+        .grid-container { display: grid; grid-template-columns: 1fr 2fr; gap: 25px; }
+        @media (max-width: 960px) { .grid-container { grid-template-columns: 1fr; } }
+
+        .card { 
+            background: var(--card-bg); 
+            border-radius: 16px; 
+            padding: 25px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+        }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0,0,0,0.5); }
+        .card h2 { font-size: 1.2rem; color: var(--text-main); border-bottom: 2px solid #2d2d30; padding-bottom: 12px; margin-top: 0; font-weight: 600; }
+        
+        /* Form Inputs */
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: var(--primary); }
+        .form-group input { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #3a3a3c; 
+            background-color: #1c1c1e; 
+            color: white;
+            border-radius: 8px; 
+            font-family: 'Poppins'; 
+            box-sizing: border-box; 
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        .grid-2-col { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        /* Table */
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 15px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #2d2d30; }
+        th { color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.75rem; }
+        tr:hover td { background-color: rgba(255, 255, 255, 0.02); } 
+        
+        .btn-run { 
+            background: linear-gradient(135deg, var(--primary) 0%, #1d4ed8 100%); 
+            color: white; 
+            border: none; 
+            width: 100%; 
+            padding: 15px; 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            font-family: 'Poppins';
+            border-radius: 12px; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            margin-top: 10px;
+        }
+        .btn-run:hover { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(59, 130, 246, 0.3); }
+        .btn-run:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        /* Results */
+        .results-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 25px; }
+        @media (max-width: 1100px) { .results-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 600px) { .results-grid { grid-template-columns: 1fr 1fr; } }
+
+        .result-box { 
+            background: #1c1c1e; 
+            border: 1px solid #2d2d30; 
+            border-radius: 12px; 
+            padding: 15px; 
+            text-align: center; 
+        }
+        .result-box h3 { font-size: 0.8rem; color: var(--text-muted); margin: 0 0 8px 0; font-weight: 600; }
+        .profit-value { font-size: 1.5rem; font-weight: 700; color: var(--secondary); line-height: 1.2; }
+        .weight-value { font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px; }
+        
+        .chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        @media (max-width: 960px) { .chart-row { grid-template-columns: 1fr; } }
+        .chart-container { 
+            position: relative; 
+            height: 380px; 
+            width: 100%; 
+            background: #1c1c1e; 
+            border-radius: 12px;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #2d2d30;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <header>
+        <h1>📦 OptiCargo</h1>
+        <p>Dashboard Simulasi Optimasi Kargo Modern</p>
+    </header>
+
+    <div class="grid-container">
+        <div class="card">
+            <h2>⚙️ Pengaturan Parameter</h2>
+            <div class="grid-2-col">
+                <div class="form-group">
+                    <label>Kapasitas Kargo (kg)</label>
+                    <input type="number" id="inp-kapasitas" value="50">
+                </div>
+                <div class="form-group">
+                    <label>Maksimal Iterasi/Gen</label>
+                    <input type="number" id="inp-iter" value="50">
+                </div>
+                <div class="form-group">
+                    <label>SA: Suhu Awal (T0)</label>
+                    <input type="text" id="inp-sa-t" value="100">
+                </div>
+                <div class="form-group">
+                    <label>SA: Cooling Rate</label>
+                    <input type="text" id="inp-sa-cool" value="0.85">
+                </div>
+                <div class="form-group">
+                    <label>GA: Ukuran Populasi</label>
+                    <input type="number" id="inp-ga-pop" value="10">
+                </div>
+                <div class="form-group">
+                    <label>GA: Mutation Rate</label>
+                    <input type="text" id="inp-ga-mut" value="0.1">
+                </div>
+            </div>
+
+            <h2 style="margin-top: 20px;">📋 Daftar Barang Tersedia</h2>
+            <div style="max-height: 250px; overflow-y: auto; background: #1c1c1e; border-radius: 8px; border: 1px solid #3a3a3c;">
+                <table>
+                    <thead><tr><th>Nama Barang</th><th>Berat</th><th>Profit</th></tr></thead>
+                    <tbody id="tabel-barang"></tbody>
+                </table>
+            </div>
+
+            <button class="btn-run" onclick="jalankanSimulasi()">🚀 Jalankan Simulasi Optimasi</button>
+        </div>
+
+        <div class="card">
+            <h2>📊 Hasil Komparasi Performa</h2>
+            
+            <div class="results-grid">
+                <div class="result-box">
+                    <h3>Simple HC</h3>
+                    <div class="profit-value" id="res-shc-profit">-</div>
+                    <span class="weight-value" id="res-shc-weight">-</span>
+                </div>
+                <div class="result-box">
+                    <h3>Steepest HC</h3>
+                    <div class="profit-value" id="res-sthc-profit">-</div>
+                    <span class="weight-value" id="res-sthc-weight">-</span>
+                </div>
+                <div class="result-box">
+                    <h3>Stochastic HC</h3>
+                    <div class="profit-value" id="res-schc-profit">-</div>
+                    <span class="weight-value" id="res-schc-weight">-</span>
+                </div>
+                <div class="result-box">
+                    <h3>Simul. Annealing</h3>
+                    <div class="profit-value" id="res-sa-profit">-</div>
+                    <span class="weight-value" id="res-sa-weight">-</span>
+                </div>
+                <div class="result-box">
+                    <h3>Genetic Algo</h3>
+                    <div class="profit-value" id="res-ga-profit">-</div>
+                    <span class="weight-value" id="res-ga-weight">-</span>
+                </div>
+            </div>
+
+            <div class="chart-row">
+                <div class="chart-container">
+                    <canvas id="grafikKonvergensi"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="grafikSuhu"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const BARANG = [
+        {nama: "Genset Mini", berat: 15, nilai: 500}, {nama: "Beras 1 Karung", berat: 25, nilai: 350},
+        {nama: "Suku Cadang", berat: 10, nilai: 250}, {nama: "Kotak P3K", berat: 2, nilai: 150},
+        {nama: "Tenda Pleton", berat: 20, nilai: 400}, {nama: "Air Mineral", berat: 10, nilai: 100},
+        {nama: "Radio Komunikasi", berat: 3, nilai: 300}, {nama: "Makanan Kaleng", berat: 8, nilai: 200},
+        {nama: "Alat Navigasi", berat: 5, nilai: 350}, {nama: "Baterai Cadangan", berat: 7, nilai: 180}
+    ];
+    const JUMLAH_BARANG = BARANG.length;
+    let chartKonvergensi = null;
+    let chartSuhu = null;
+
+    window.onload = () => {
+        try {
+            const tbody = document.getElementById('tabel-barang');
+            BARANG.forEach(b => {
+                // Warna font untuk "berat" diubah jadi lebih terang agar jelas di mode gelap
+                tbody.innerHTML += `<tr><td>${b.nama}</td><td style="font-weight:600; color:#a1a1aa;">${b.berat} kg</td><td style="color:#10b981; font-weight:700;">💰 ${b.nilai}</td></tr>`;
+            });
+            renderGrafikKosong();
+        } catch (error) {
+            console.error("Gagal memuat awal:", error);
+            alert("Gagal memuat komponen web. Pastikan Anda terhubung ke internet untuk memuat library Chart.js.");
+        }
+    };
+
+    function ambilParameter() {
+        const parseIndoFloat = (id) => parseFloat(document.getElementById(id).value.replace(',', '.')) || 0;
+        const parseIntSafe = (id) => parseInt(document.getElementById(id).value) || 0;
+        return {
+            kapasitas: parseIntSafe('inp-kapasitas') || 50,
+            maxIter: parseIntSafe('inp-iter') || 50,
+            saT: parseIndoFloat('inp-sa-t') || 100,
+            saCool: parseIndoFloat('inp-sa-cool') || 0.85,
+            gaPop: parseIntSafe('inp-ga-pop') || 10,
+            gaMut: parseIndoFloat('inp-ga-mut') || 0.1
+        };
+    }
+
+    function evaluasiSolusi(solusi, kapasitasMaks) {
+        let berat = 0, profit = 0;
+        for (let i = 0; i < JUMLAH_BARANG; i++) {
+            if (solusi[i] === 1) { berat += BARANG[i].berat; profit += BARANG[i].nilai; }
+        }
+        return { profit: berat > kapasitasMaks ? 0 : profit, berat: berat };
+    }
+
+    function generateSolusiAwal() { return Array.from({length: JUMLAH_BARANG}, () => Math.random() < 0.5 ? 1 : 0); }
+    function getNeighbors(solusi) {
+        let neighbors = [];
+        for (let i = 0; i < JUMLAH_BARANG; i++) { let n = [...solusi]; n[i] = 1 - n[i]; neighbors.push(n); }
+        return neighbors;
+    }
+
+    function simpleHC(params) {
+        let curr = generateSolusiAwal(), evalCurr = evaluasiSolusi(curr, params.kapasitas);
+        let hist = [evalCurr.profit];
+        for (let i = 0; i < params.maxIter; i++) {
+            let neighbors = getNeighbors(curr);
+            for (let n of neighbors) {
+                let evalN = evaluasiSolusi(n, params.kapasitas);
+                if (evalN.profit > evalCurr.profit) { curr = n; evalCurr = evalN; break; }
+            }
+            hist.push(evalCurr.profit);
+        }
+        return { ...evalCurr, history: hist };
+    }
+
+    function steepestHC(params) {
+        let curr = generateSolusiAwal(), evalCurr = evaluasiSolusi(curr, params.kapasitas);
+        let hist = [evalCurr.profit];
+        for (let i = 0; i < params.maxIter; i++) {
+            let bestN = curr, bestEval = evalCurr;
+            for (let n of getNeighbors(curr)) {
+                let evalN = evaluasiSolusi(n, params.kapasitas);
+                if (evalN.profit > bestEval.profit) { bestN = n; bestEval = evalN; }
+            }
+            if (bestEval.profit > evalCurr.profit) { curr = bestN; evalCurr = bestEval; }
+            hist.push(evalCurr.profit);
+        }
+        return { ...evalCurr, history: hist };
+    }
+
+    function stochasticHC(params) {
+        let curr = generateSolusiAwal(), evalCurr = evaluasiSolusi(curr, params.kapasitas);
+        let hist = [evalCurr.profit];
+        for (let i = 0; i < params.maxIter; i++) {
+            let betterNeighbors = [];
+            for (let n of getNeighbors(curr)) {
+                let evalN = evaluasiSolusi(n, params.kapasitas);
+                if (evalN.profit > evalCurr.profit) betterNeighbors.push({sol: n, ev: evalN});
+            }
+            if (betterNeighbors.length > 0) {
+                let randomPick = betterNeighbors[Math.floor(Math.random() * betterNeighbors.length)];
+                curr = randomPick.sol; evalCurr = randomPick.ev;
+            }
+            hist.push(evalCurr.profit);
+        }
+        return { ...evalCurr, history: hist };
+    }
+
+    function simulatedAnnealing(params) {
+        let curr = generateSolusiAwal(), evalCurr = evaluasiSolusi(curr, params.kapasitas);
+        let hist = [evalCurr.profit], tempHist = [params.saT], T = params.saT;
+        for (let i = 0; i < params.maxIter; i++) {
+            let neighbors = getNeighbors(curr);
+            let n = neighbors[Math.floor(Math.random() * neighbors.length)];
+            let evalN = evaluasiSolusi(n, params.kapasitas);
+            let delta = evalN.profit - evalCurr.profit;
+            if (delta > 0 || (T > 0 && Math.random() < Math.exp(delta / T))) { curr = n; evalCurr = evalN; }
+            hist.push(evalCurr.profit);
+            T *= params.saCool;
+            tempHist.push(T);
+        }
+        return { ...evalCurr, history: hist, tempHistory: tempHist };
+    }
+
+    function geneticAlgorithm(params) {
+        let populasi = Array.from({length: params.gaPop}, generateSolusiAwal);
+        let hist = [], bestGlobal = { profit: 0, berat: 0 };
+        for (let gen = 0; gen <= params.maxIter; gen++) {
+            let evals = populasi.map(ind => evaluasiSolusi(ind, params.kapasitas));
+            let bestGenIdx = evals.reduce((best, curr, idx, arr) => curr.profit > arr[best].profit ? idx : best, 0);
+            if (evals[bestGenIdx].profit > bestGlobal.profit) bestGlobal = evals[bestGenIdx];
+            hist.push(bestGlobal.profit);
+            let popBaru = [populasi[bestGenIdx]]; 
+            while(popBaru.length < params.gaPop) {
+                let p1 = populasi[Math.floor(Math.random() * params.gaPop)], p2 = populasi[Math.floor(Math.random() * params.gaPop)];
+                let titik = Math.floor(Math.random() * (JUMLAH_BARANG - 1)) + 1;
+                let c = p1.slice(0, titik).concat(p2.slice(titik));
+                for(let i=0; i<JUMLAH_BARANG; i++) { if(Math.random() < params.gaMut) c[i] = 1 - c[i]; }
+                popBaru.push(c);
+            }
+            populasi = popBaru.slice(0, params.gaPop); 
+        }
+        return { ...bestGlobal, history: hist };
+    }
+
+    function jalankanSimulasi() {
+        const btn = document.querySelector('.btn-run');
+        btn.innerText = "⏳ Sedang Menghitung..."; btn.disabled = true;
+        setTimeout(() => {
+            const params = ambilParameter();
+            let resSHC = simpleHC(params), resStHC = steepestHC(params), resScHC = stochasticHC(params);
+            let resSA = simulatedAnnealing(params), resGA = geneticAlgorithm(params);
+
+            updateUI('shc', resSHC, params.kapasitas); updateUI('sthc', resStHC, params.kapasitas);
+            updateUI('schc', resScHC, params.kapasitas); updateUI('sa', resSA, params.kapasitas); updateUI('ga', resGA, params.kapasitas);
+
+            renderGrafikKonvergensi(resSHC.history, resStHC.history, resScHC.history, resSA.history, resGA.history, params.maxIter);
+            renderGrafikSuhu(resSA.tempHistory, params.maxIter);
+            btn.innerText = "🚀 Jalankan Ulang Optimasi"; btn.disabled = false;
+        }, 300);
+    }
+
+    function updateUI(id, data, maxCap) {
+        document.getElementById(`res-${id}-profit`).innerText = data.profit;
+        document.getElementById(`res-${id}-weight`).innerText = `${data.berat}/${maxCap} kg`;
+    }
+
+    function renderGrafikKosong() {
+        const configDefault = { type: 'line', data: { labels: [], datasets: [] }, options: { responsive: true, maintainAspectRatio: false } };
+        chartKonvergensi = new Chart(document.getElementById('grafikKonvergensi').getContext('2d'), configDefault);
+        chartSuhu = new Chart(document.getElementById('grafikSuhu').getContext('2d'), configDefault);
+    }
+
+    function renderGrafikKonvergensi(h1, h2, h3, h4, h5, maxIter) {
+        let labels = Array.from({length: maxIter + 1}, (_, i) => i);
+        chartKonvergensi.destroy(); 
+        const fontConfig = { family: 'Poppins', size: 11, color: '#a1a1aa' };
+        chartKonvergensi = new Chart(document.getElementById('grafikKonvergensi').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: 'Simple HC', data: h1, borderColor: '#94a3b8', borderWidth: 2, tension: 0.3, pointRadius: 1 },
+                    { label: 'Steepest HC', data: h2, borderColor: '#3b82f6', borderWidth: 2, tension: 0.3, pointRadius: 1 },
+                    { label: 'Stochastic HC', data: h3, borderColor: '#a855f7', borderWidth: 2, tension: 0.3, pointRadius: 1 },
+                    { label: 'Sim. Annealing', data: h4, borderColor: '#f59e0b', borderWidth: 3, tension: 0.3, pointRadius: 0, fill: false },
+                    { label: 'Genetic Algo', data: h5, borderColor: '#10b981', borderWidth: 3, tension: 0.1, pointRadius: 0, fill: false }
+                ]
+            },
+            options: { 
+                responsive: true, maintainAspectRatio: false, color: '#a1a1aa',
+                plugins: { 
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: fontConfig, padding: 15, color: '#a1a1aa' } }, 
+                    title: { display: true, text: 'Kurva Konvergensi Profit (HC vs SA vs GA)', font: { family: 'Poppins', size: 14, weight: '600' }, color: '#ffffff', padding: 10 },
+                    tooltip: { mode: 'index', intersect: false }
+                },
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: 'Total Profit', font: fontConfig, color: '#a1a1aa' }, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#a1a1aa' } },
+                    x: { title: { display: true, text: 'Iterasi / Generasi', font: fontConfig, color: '#a1a1aa' }, grid: { display: false }, ticks: { color: '#a1a1aa' } }
+                }
+            }
+        });
+    }
+
+    function renderGrafikSuhu(tempHist, maxIter) {
+        let labels = Array.from({length: maxIter + 1}, (_, i) => i);
+        chartSuhu.destroy(); 
+        chartSuhu = new Chart(document.getElementById('grafikSuhu').getContext('2d'), {
+            type: 'line',
+            data: { labels: labels, datasets: [{ label: 'Suhu (T)', data: tempHist, borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.08)', fill: true, borderWidth: 2, tension: 0.4, pointRadius: 0 }] },
+            options: { 
+                responsive: true, maintainAspectRatio: false, color: '#a1a1aa',
+                plugins: { legend: { display: false }, title: { display: true, text: 'Cooling Schedule (Penurunan Suhu SA)', font: { family: 'Poppins', size: 13, weight: '600' }, color: '#ffffff' } },
+                scales: { y: { beginAtZero: true, title: { display: true, text: 'Suhu (T)', color: '#a1a1aa' }, grid: { display: false }, ticks: { color: '#a1a1aa' } }, x: { grid: { display: false }, ticks: { display: false } } }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
