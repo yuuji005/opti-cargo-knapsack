@@ -3,136 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OptiCargo - Simulasi Knapsack</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>OptiCargo - Analytics Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { 
-            --primary: #3b82f6; 
-            --primary-hover: #2563eb; 
-            --secondary: #10b981; 
+            --bg-main: #0B1120;        
+            --bg-card: #1E293B;        
+            --bg-input: #0F172A;       
+            --border-color: #334155;   
             
-            --bg-color-start: #121212; 
-            --bg-color-end: #1c1c1e;   
-            --card-bg: #242426;        
-            --text-main: #ffffff;      
-            --text-muted: #a1a1aa;     
+            --text-main: #F8FAFC;      
+            --text-muted: #94A3B8;     
+            
+            --accent-blue: #3B82F6;    
+            --accent-cyan: #0EA5E9;    
+            --accent-green: #10B981;   
+            --accent-purple: #8B5CF6; 
+            --accent-red: #EF4444;     
         }
 
-        /* Kustomisasi Scrollbar agar tema gelap lebih rapi */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #1c1c1e; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb { background: #3a3a3c; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
         body { 
-            font-family: 'Poppins', sans-serif; 
-            background: linear-gradient(135deg, var(--bg-color-start) 0%, var(--bg-color-end) 100%);
-            background-attachment: fixed; 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-main);
             color: var(--text-main); 
             margin: 0; 
-            padding: 20px; 
+            padding: 30px 20px; 
             min-height: 100vh;
         }
 
         .dashboard { max-width: 1300px; margin: auto; }
 
+        /* Header */
         header { 
-            text-align: center; 
             margin-bottom: 30px; 
-            background: rgba(36, 36, 38, 0.6); 
-            padding: 20px;
-            border-radius: 16px;
-            backdrop-filter: blur(5px); 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
         }
-        header h1 { font-size: 2.5rem; color: var(--primary); margin: 0 0 5px 0; letter-spacing: -1px; }
-        header p { color: var(--text-muted); margin: 0; font-weight: 300; }
+        header h1 { 
+            font-size: 2rem; 
+            font-weight: 700;
+            color: var(--text-main); 
+            margin: 0; 
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        header h1::before {
+            content: '';
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+        header p { color: var(--text-muted); margin: 0; font-size: 0.95rem; font-weight: 500; }
 
-        .grid-container { display: grid; grid-template-columns: 1fr 2fr; gap: 25px; }
+        .grid-container { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
         @media (max-width: 960px) { .grid-container { grid-template-columns: 1fr; } }
 
+        /* Cards */
         .card { 
-            background: var(--card-bg); 
-            border-radius: 16px; 
-            padding: 25px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.05); 
+            background: var(--bg-card); 
+            padding: 20px; 
+            border: 1px solid var(--border-color);
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        .card:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0,0,0,0.5); }
-        .card h2 { font-size: 1.2rem; color: var(--text-main); border-bottom: 2px solid #2d2d30; padding-bottom: 12px; margin-top: 0; font-weight: 600; }
-        
+        .card h2 { 
+            font-size: 1.05rem; 
+            color: var(--text-main); 
+            margin-top: 0; 
+            margin-bottom: 15px;
+            font-weight: 600; 
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         /* Form Inputs */
-        .form-group { margin-bottom: 18px; }
-        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: var(--primary); }
-        .form-group input { 
-            width: 100%; 
-            padding: 10px; 
-            border: 1px solid #3a3a3c; 
-            background-color: #1c1c1e; 
-            color: white;
-            border-radius: 8px; 
-            font-family: 'Poppins'; 
-            box-sizing: border-box; 
-            font-size: 0.9rem;
-            transition: border-color 0.2s;
+        .form-group { margin-bottom: 15px; }
+        .form-group label { 
+            display: block; font-size: 0.75rem; font-weight: 600; 
+            margin-bottom: 6px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
         }
-        .form-group input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
-        .grid-2-col { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-group input { 
+            width: 100%; padding: 10px 12px; 
+            border: 1px solid var(--border-color); 
+            background-color: var(--bg-input); 
+            color: var(--text-main);
+            border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.9rem;
+            box-sizing: border-box; transition: all 0.3s ease;
+        }
+        .form-group input:focus { 
+            outline: none; border-color: var(--accent-blue); 
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        .grid-2-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         
         /* Table */
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 15px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #2d2d30; }
-        th { color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.75rem; }
-        tr:hover td { background-color: rgba(255, 255, 255, 0.02); } 
-        
-        .btn-run { 
-            background: linear-gradient(135deg, var(--primary) 0%, #1d4ed8 100%); 
-            color: white; 
-            border: none; 
-            width: 100%; 
-            padding: 15px; 
-            font-size: 1.1rem; 
-            font-weight: 600; 
-            font-family: 'Poppins';
-            border-radius: 12px; 
-            cursor: pointer; 
-            transition: 0.3s; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            margin-top: 10px;
+        .table-container {
+            max-height: 250px; overflow-y: auto; 
+            border: 1px solid var(--border-color);
+            border-radius: 8px; margin-bottom: 15px; background: var(--bg-input);
         }
-        .btn-run:hover { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(59, 130, 246, 0.3); }
-        .btn-run:disabled { opacity: 0.6; cursor: not-allowed; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { 
+            background-color: var(--bg-card); color: var(--text-muted); font-weight: 600; 
+            position: sticky; top: 0; z-index: 10; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        tbody tr { transition: background-color 0.2s; }
+        tbody tr:hover { background-color: rgba(59, 130, 246, 0.1); }
         
-        /* Results */
-        .results-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 25px; }
+        /* Tombol dengan Animasi */
+        .btn-run { 
+            background: linear-gradient(to right, var(--accent-blue), var(--accent-cyan));
+            color: white; border: none; width: 100%; padding: 14px; 
+            font-size: 0.95rem; font-weight: 600; border-radius: 8px; 
+            cursor: pointer; transition: all 0.2s ease; margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+        .btn-run:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(14, 165, 233, 0.4); filter: brightness(1.1); }
+        .btn-run:active { transform: translateY(1px) scale(0.98); } /* Efek ditekan (animasi) */
+        .btn-run:disabled { background: var(--border-color); box-shadow: none; cursor: not-allowed; transform: none; color: var(--text-muted); }
+        
+        /* Result Boxes */
+        .results-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
         @media (max-width: 1100px) { .results-grid { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 600px) { .results-grid { grid-template-columns: 1fr 1fr; } }
 
         .result-box { 
-            background: #1c1c1e; 
-            border: 1px solid #2d2d30; 
-            border-radius: 12px; 
-            padding: 15px; 
-            text-align: center; 
+            background: var(--bg-input); border: 1px solid var(--border-color); 
+            border-radius: 10px; padding: 15px 10px; text-align: center; 
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            position: relative; overflow: hidden;
         }
-        .result-box h3 { font-size: 0.8rem; color: var(--text-muted); margin: 0 0 8px 0; font-weight: 600; }
-        .profit-value { font-size: 1.5rem; font-weight: 700; color: var(--secondary); line-height: 1.2; }
-        .weight-value { font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px; }
+        .result-box:hover { transform: translateY(-3px); border-color: var(--accent-blue); }
         
-        .chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        /* Garis atas aksen bercahaya */
+        .result-box::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+        }
+        .res-shc::before { background: var(--text-muted); }
+        .res-sthc::before { background: var(--accent-blue); }
+        .res-schc::before { background: var(--accent-purple); }
+        .res-sa::before { background: #F59E0B; } /* Amber */
+        .res-ga::before { background: var(--accent-green); }
+
+        .result-box h3 { font-size: 0.7rem; color: var(--text-muted); margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+        .profit-value { font-size: 1.5rem; font-weight: 700; color: var(--text-main); line-height: 1.2; }
+        .weight-value { font-size: 0.7rem; color: var(--text-muted); display: block; margin-top: 5px; }
+        
+        /* Area Grafik */
+        .chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; }
         @media (max-width: 960px) { .chart-row { grid-template-columns: 1fr; } }
         .chart-container { 
-            position: relative; 
-            height: 380px; 
-            width: 100%; 
-            background: #1c1c1e; 
-            border-radius: 12px;
-            padding: 10px;
-            box-sizing: border-box;
-            border: 1px solid #2d2d30;
+            position: relative; height: 360px; width: 100%; 
+            background: var(--bg-input); border-radius: 10px; padding: 15px;
+            box-sizing: border-box; border: 1px solid var(--border-color);
         }
     </style>
 </head>
@@ -140,79 +181,79 @@
 
 <div class="dashboard">
     <header>
-        <h1>📦 OptiCargo</h1>
-        <p>Dashboard Simulasi Optimasi Kargo Modern</p>
+        <h1>OptiCargo Analytics</h1>
+        <p>Real-time Simulation & Optimization Dashboard</p>
     </header>
 
     <div class="grid-container">
         <div class="card">
-            <h2>⚙️ Pengaturan Parameter</h2>
+            <h2>⚙️ System Parameters</h2>
             <div class="grid-2-col">
                 <div class="form-group">
-                    <label>Kapasitas Kargo (kg)</label>
+                    <label>Max Capacity (kg)</label>
                     <input type="number" id="inp-kapasitas" value="50">
                 </div>
                 <div class="form-group">
-                    <label>Maksimal Iterasi/Gen</label>
+                    <label>Epochs / Gen</label>
                     <input type="number" id="inp-iter" value="50">
                 </div>
                 <div class="form-group">
-                    <label>SA: Suhu Awal (°C)</label>
+                    <label>SA Initial Temp (°C)</label>
                     <input type="text" id="inp-sa-t" value="100">
                 </div>
                 <div class="form-group">
-                    <label>SA: Cooling Rate</label>
+                    <label>SA Cooling Rate</label>
                     <input type="text" id="inp-sa-cool" value="0.85">
                 </div>
                 <div class="form-group">
-                    <label>GA: Ukuran Populasi</label>
+                    <label>GA Population</label>
                     <input type="number" id="inp-ga-pop" value="10">
                 </div>
                 <div class="form-group">
-                    <label>GA: Mutation Rate</label>
+                    <label>GA Mut. Rate</label>
                     <input type="text" id="inp-ga-mut" value="0.1">
                 </div>
             </div>
 
-            <h2 style="margin-top: 20px;">📋 Daftar Barang Tersedia</h2>
-            <div style="max-height: 250px; overflow-y: auto; background: #1c1c1e; border-radius: 8px; border: 1px solid #3a3a3c;">
+            <h2 style="margin-top: 20px;">📦 Inventory Data</h2>
+            <div class="table-container">
                 <table>
-                    <thead><tr><th>Nama Barang</th><th>Berat</th><th>Profit</th></tr></thead>
+                    <thead><tr><th>Item Name</th><th>Weight</th><th>Profit</th></tr></thead>
                     <tbody id="tabel-barang"></tbody>
                 </table>
             </div>
 
-            <button class="btn-run" onclick="jalankanSimulasi()">🚀 Jalankan Simulasi Optimasi</button>
+            <button class="btn-run" onclick="jalankanSimulasi()">Initialize Simulation</button>
         </div>
 
         <div class="card">
-            <h2>📊 Hasil Komparasi Performa</h2>
+            <h2>📊 Performance Metrics</h2>
             
             <div class="results-grid">
-                <div class="result-box">
+                <div class="result-box res-shc">
                     <h3>Simple HC</h3>
-                    <div class="profit-value" id="res-shc-profit">-</div>
-                    <span class="weight-value" id="res-shc-weight">-</span>
+                    <div class="profit-value" id="res-shc-profit">0</div>
+                    <span class="weight-value" id="res-shc-weight">0 / 50 kg</span>
                 </div>
-                <div class="result-box">
+                <div class="result-box res-sthc">
                     <h3>Steepest HC</h3>
-                    <div class="profit-value" id="res-sthc-profit">-</div>
-                    <span class="weight-value" id="res-sthc-weight">-</span>
+                    <div class="profit-value" id="res-sthc-profit">0</div>
+                    <span class="weight-value" id="res-sthc-weight">0 / 50 kg</span>
                 </div>
-                <div class="result-box">
+                <div class="result-box res-schc">
                     <h3>Stochastic HC</h3>
-                    <div class="profit-value" id="res-schc-profit">-</div>
-                    <span class="weight-value" id="res-schc-weight">-</span>
+                    <div class="profit-value" id="res-schc-profit">0</div>
+                    <span class="weight-value" id="res-schc-weight">0 / 50 kg</span>
                 </div>
-                <div class="result-box">
-                    <h3>Simul. Annealing</h3>
-                    <div class="profit-value" id="res-sa-profit">-</div>
-                    <span class="weight-value" id="res-sa-weight">-</span>
+                <div class="result-box res-sa">
+                    <h3>Sim. Annealing</h3>
+                    <div class="profit-value" id="res-sa-profit">0</div>
+                    <span class="weight-value" id="res-sa-weight">0 / 50 kg</span>
                 </div>
-                <div class="result-box">
+                <div class="result-box res-ga">
                     <h3>Genetic Algo</h3>
-                    <div class="profit-value" id="res-ga-profit">-</div>
-                    <span class="weight-value" id="res-ga-weight">-</span>
+                    <div class="profit-value" id="res-ga-profit">0</div>
+                    <span class="weight-value" id="res-ga-weight">0 / 50 kg</span>
                 </div>
             </div>
 
@@ -240,18 +281,20 @@
     let chartKonvergensi = null;
     let chartSuhu = null;
 
+    // Set Default Font untuk Chart.js agar sesuai tema
+    Chart.defaults.color = '#94A3B8';
+    Chart.defaults.font.family = 'Inter';
+
     window.onload = () => {
-        try {
-            const tbody = document.getElementById('tabel-barang');
-            BARANG.forEach(b => {
-                // Warna font untuk "berat" diubah jadi lebih terang agar jelas di mode gelap
-                tbody.innerHTML += `<tr><td>${b.nama}</td><td style="font-weight:600; color:#a1a1aa;">${b.berat} kg</td><td style="color:#10b981; font-weight:700;">💰 ${b.nilai}</td></tr>`;
-            });
-            renderGrafikKosong();
-        } catch (error) {
-            console.error("Gagal memuat awal:", error);
-            alert("Gagal memuat komponen web. Pastikan Anda terhubung ke internet untuk memuat library Chart.js.");
-        }
+        const tbody = document.getElementById('tabel-barang');
+        BARANG.forEach(b => {
+            tbody.innerHTML += `<tr>
+                <td style="color:#F8FAFC; font-weight:500;">${b.nama}</td>
+                <td>${b.berat} kg</td>
+                <td style="color:#10B981;">Rp ${b.nilai}K</td>
+            </tr>`;
+        });
+        renderGrafikKosong();
     };
 
     function ambilParameter() {
@@ -282,6 +325,7 @@
         return neighbors;
     }
 
+    // LOGIKA ALGORITMA
     function simpleHC(params) {
         let curr = generateSolusiAwal(), evalCurr = evaluasiSolusi(curr, params.kapasitas);
         let hist = [evalCurr.profit];
@@ -366,9 +410,12 @@
         return { ...bestGlobal, history: hist };
     }
 
+    // FUNGSI UTAMA & RENDER
     function jalankanSimulasi() {
         const btn = document.querySelector('.btn-run');
-        btn.innerText = "⏳ Sedang Menghitung..."; btn.disabled = true;
+        btn.innerText = "Processing Data..."; btn.disabled = true;
+        
+        // Delay animasi loading
         setTimeout(() => {
             const params = ambilParameter();
             let resSHC = simpleHC(params), resStHC = steepestHC(params), resScHC = stochasticHC(params);
@@ -379,13 +426,20 @@
 
             renderGrafikKonvergensi(resSHC.history, resStHC.history, resScHC.history, resSA.history, resGA.history, params.maxIter);
             renderGrafikSuhu(resSA.tempHistory, params.maxIter);
-            btn.innerText = "🚀 Jalankan Ulang Optimasi"; btn.disabled = false;
-        }, 300);
+            
+            btn.innerText = "Run Simulation Again"; btn.disabled = false;
+        }, 400);
     }
 
     function updateUI(id, data, maxCap) {
-        document.getElementById(`res-${id}-profit`).innerText = data.profit;
-        document.getElementById(`res-${id}-weight`).innerText = `${data.berat}/${maxCap} kg`;
+        // Animasi angka (sederhana)
+        const target = document.getElementById(`res-${id}-profit`);
+        target.style.opacity = 0;
+        setTimeout(() => {
+            target.innerText = data.profit;
+            target.style.opacity = 1;
+            document.getElementById(`res-${id}-weight`).innerText = `${data.berat} / ${maxCap} kg`;
+        }, 150);
     }
 
     function renderGrafikKosong() {
@@ -397,29 +451,39 @@
     function renderGrafikKonvergensi(h1, h2, h3, h4, h5, maxIter) {
         let labels = Array.from({length: maxIter + 1}, (_, i) => i);
         chartKonvergensi.destroy(); 
-        const fontConfig = { family: 'Poppins', size: 11, color: '#a1a1aa' };
+        
+        // Warna Chart.js Sesuai Tema
+        const cSHC = '#94A3B8'; // Muted
+        const cStHC = '#3B82F6'; // Blue
+        const cScHC = '#8B5CF6'; // Purple
+        const cSA = '#F59E0B'; // Amber
+        const cGA = '#10B981'; // Green
+
         chartKonvergensi = new Chart(document.getElementById('grafikKonvergensi').getContext('2d'), {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [
-                    { label: 'Simple HC', data: h1, borderColor: '#94a3b8', borderWidth: 2, tension: 0.3, pointRadius: 1 },
-                    { label: 'Steepest HC', data: h2, borderColor: '#3b82f6', borderWidth: 2, tension: 0.3, pointRadius: 1 },
-                    { label: 'Stochastic HC', data: h3, borderColor: '#a855f7', borderWidth: 2, tension: 0.3, pointRadius: 1 },
-                    { label: 'Sim. Annealing', data: h4, borderColor: '#f59e0b', borderWidth: 3, tension: 0.3, pointRadius: 0, fill: false },
-                    { label: 'Genetic Algo', data: h5, borderColor: '#10b981', borderWidth: 3, tension: 0.1, pointRadius: 0, fill: false }
+                    { label: 'Simple HC', data: h1, borderColor: cSHC, borderWidth: 2, tension: 0.3, pointRadius: 0 },
+                    { label: 'Steepest HC', data: h2, borderColor: cStHC, borderWidth: 2, tension: 0.3, pointRadius: 0 },
+                    { label: 'Stochastic HC', data: h3, borderColor: cScHC, borderWidth: 2, tension: 0.3, pointRadius: 0 },
+                    // Efek Glow / Fill untuk SA & GA (yang biasanya menang)
+                    { label: 'Sim. Annealing', data: h4, borderColor: cSA, backgroundColor: 'rgba(245, 158, 11, 0.1)', borderWidth: 3, tension: 0.3, pointRadius: 0, fill: true },
+                    { label: 'Genetic Algo', data: h5, borderColor: cGA, backgroundColor: 'rgba(16, 185, 129, 0.1)', borderWidth: 3, tension: 0.3, pointRadius: 0, fill: true }
                 ]
             },
             options: { 
-                responsive: true, maintainAspectRatio: false, color: '#a1a1aa',
+                responsive: true, maintainAspectRatio: false,
+                animation: { duration: 800, easing: 'easeOutQuart' }, // Animasi render halus
+                interaction: { mode: 'index', intersect: false },
                 plugins: { 
-                    legend: { position: 'bottom', labels: { boxWidth: 12, font: fontConfig, padding: 15, color: '#a1a1aa' } }, 
-                    title: { display: true, text: 'Kurva Konvergensi Profit (HC vs SA vs GA)', font: { family: 'Poppins', size: 14, weight: '600' }, color: '#ffffff', padding: 10 },
-                    tooltip: { mode: 'index', intersect: false }
+                    legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true, padding: 20 } }, 
+                    title: { display: true, text: 'Convergence Analysis', color: '#F8FAFC', font: { size: 14, weight: '600' }, padding: { bottom: 15 } },
+                    tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleColor: '#F8FAFC', bodyColor: '#94A3B8', borderColor: '#334155', borderWidth: 1 }
                 },
                 scales: {
-                    y: { beginAtZero: true, title: { display: true, text: 'Total Profit', font: fontConfig, color: '#a1a1aa' }, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#a1a1aa' } },
-                    x: { title: { display: true, text: 'Iterasi / Generasi', font: fontConfig, color: '#a1a1aa' }, grid: { display: false }, ticks: { color: '#a1a1aa' } }
+                    y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, title: { display: true, text: 'Total Profit' } },
+                    x: { grid: { display: false }, title: { display: true, text: 'Epochs / Generations' } }
                 }
             }
         });
@@ -430,15 +494,17 @@
         chartSuhu.destroy(); 
         chartSuhu = new Chart(document.getElementById('grafikSuhu').getContext('2d'), {
             type: 'line',
-            data: { labels: labels, datasets: [{ label: 'Suhu (°C)', data: tempHist, borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.08)', fill: true, borderWidth: 2, tension: 0.4, pointRadius: 0 }] },
+            data: { labels: labels, datasets: [{ label: 'Temp (°C)', data: tempHist, borderColor: '#EF4444', backgroundColor: 'rgba(239, 68, 68, 0.15)', fill: true, borderWidth: 2, tension: 0.4, pointRadius: 0 }] },
             options: { 
-                responsive: true, maintainAspectRatio: false, color: '#a1a1aa',
+                responsive: true, maintainAspectRatio: false,
+                animation: { duration: 800 },
                 plugins: { 
                     legend: { display: false }, 
-                    title: { display: true, text: 'Cooling Schedule (°C)', font: { family: 'Poppins', size: 13, weight: '600' }, color: '#ffffff' } 
+                    title: { display: true, text: 'SA Cooling Curve', color: '#F8FAFC', font: { size: 13, weight: '600' } },
+                    tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', borderColor: '#334155', borderWidth: 1 }
                 },
                 scales: { 
-                    y: { beginAtZero: true, title: { display: true, text: 'Suhu (°C)', color: '#a1a1aa' }, grid: { display: false }, ticks: { color: '#a1a1aa' } }, 
+                    y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' } }, 
                     x: { grid: { display: false }, ticks: { display: false } } 
                 }
             }
